@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Add Provider - Food Wastage Management{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-plus-circle"></i> Register New Provider</h1>
+            <a href="{{ url_for('providers') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Providers
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5><i class="fas fa-store"></i> Provider Information</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="providerForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Organization Name *</label>
+                                <input type="text" class="form-control" id="name" name="name" 
+                                       required maxlength="100" placeholder="e.g., Green Valley Restaurant">
+                                <div class="form-text">Official name of your organization</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="type" class="form-label">Provider Type *</label>
+                                <select class="form-select" id="type" name="type" required>
+                                    <option value="">Select Provider Type</option>
+                                    <option value="Restaurant">Restaurant</option>
+                                    <option value="Grocery Store">Grocery Store</option>
+                                    <option value="Supermarket">Supermarket</option>
+                                    <option value="Catering Service">Catering Service</option>
+                                    <option value="Food Manufacturer">Food Manufacturer</option>
+                                    <option value="Bakery">Bakery</option>
+                                    <option value="Cafe">Cafe</option>
+                                    <option value="Hotel">Hotel</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Full Address *</label>
+                        <textarea class="form-control" id="address" name="address" rows="3" 
+                                  required placeholder="Street address, building number, area"></textarea>
+                        <div class="form-text">Complete address where food items can be collected</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="city" class="form-label">City *</label>
+                                <input type="text" class="form-control" id="city" name="city" 
+                                       required maxlength="50" placeholder="e.g., New York">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="contact" class="form-label">Contact Number *</label>
+                                <input type="tel" class="form-control" id="contact" name="contact" 
+                                       required placeholder="e.g., +1-555-0123">
+                                <div class="form-text">Primary contact number for coordination</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="email" 
+                               placeholder="contact@example.com">
+                        <div class="form-text">Optional: Email for notifications and updates</div>
+                    </div>
+
+                    <!-- Provider Guidelines -->
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <h6><i class="fas fa-info-circle"></i> Provider Responsibilities</h6>
+                            <ul class="mb-0 small">
+                                <li>Ensure all donated food meets safety standards</li>
+                                <li>Provide accurate information about food items</li>
+                                <li>Specify clear pickup times and locations</li>
+                                <li>Respond promptly to food claim requests</li>
+                                <li>Follow local food safety regulations</li>
+                                <li>Update food availability status regularly</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Terms and Conditions -->
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="terms" required>
+                            <label class="form-check-label" for="terms">
+                                I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and Conditions</a> *
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="safety">
+                            <label class="form-check-label" for="safety">
+                                I confirm that all food donations will meet safety and quality standards
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-success me-2">
+                                <i class="fas fa-save"></i> Register Provider
+                            </button>
+                            <a href="{{ url_for('providers') }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Benefits Card -->
+<div class="row mt-4">
+    <div class="col-md-8 offset-md-2">
+        <div class="card border-success">
+            <div class="card-header bg-success text-white">
+                <h6><i class="fas fa-leaf"></i> Benefits of Joining</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-recycle"></i> Environmental Impact</h6>
+                        <ul class="small">
+                            <li>Reduce food waste and environmental footprint</li>
+                            <li>Support sustainable business practices</li>
+                            <li>Contribute to circular economy</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-heart"></i> Social Impact</h6>
+                        <ul class="small">
+                            <li>Help feed those in need</li>
+                            <li>Build community partnerships</li>
+                            <li>Enhance corporate social responsibility</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Terms Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Terms and Conditions for Food Providers</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>1. Food Safety and Quality</h6>
+                <p>Providers must ensure all donated food items are safe for consumption and meet local health department standards.</p>
+                
+                <h6>2. Accurate Information</h6>
+                <p>All information provided about food items must be accurate, including expiry dates, quantities, and preparation methods.</p>
+                
+                <h6>3. Availability and Pickup</h6>
+                <p>Providers must honor confirmed pickup arrangements and update availability status promptly.</p>
+                
+                <h6>4. Liability</h6>
+                <p>Providers are responsible for ensuring food safety until pickup. The platform facilitates connections but does not assume liability.</p>
+                
+                <h6>5. Non-Discrimination</h6>
+                <p>Food donations must be offered without discrimination based on race, religion, gender, or other protected characteristics.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Accept</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    const form = document.getElementById('providerForm');
+    
+    form.addEventListener('submit', function(e) {
+        const terms = document.getElementById('terms');
+        if (!terms.checked) {
+            e.preventDefault();
+            alert('Please accept the terms and conditions to proceed.');
+            return false;
+        }
+        
+        // Basic phone number validation
+        const contact = document.getElementById('contact').value;
+        const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+        if (!phoneRegex.test(contact.replace(/[-\s\(\)]/g, ''))) {
+            e.preventDefault();
+            alert('Please enter a valid contact number.');
+            return false;
+        }
+    });
+    
+    // Auto-format phone number
+    const contactInput = document.getElementById('contact');
+    contactInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 10) {
+            value = value.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+        }
+        e.target.value = value;
+    });
+    
+    // Terms modal auto-check
+    document.getElementById('termsModal').addEventListener('hidden.bs.modal', function() {
+        document.getElementById('terms').checked = true;
+    });
+});
+</script>
+{% endblock %}

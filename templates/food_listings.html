@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+
+{% block title %}Food Listings - Food Wastage Management{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-utensils"></i> Food Listings</h1>
+            <a href="{{ url_for('add_food_listing') }}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Add New Listing
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-filter"></i> Filters</h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="food_type" class="form-label">Food Type</label>
+                        <select class="form-select" id="food_type" name="food_type">
+                            <option value="">All Types</option>
+                            {% for food_type in food_types %}
+                                <option value="{{ food_type }}" {{ 'selected' if food_type == selected_food_type }}>
+                                    {{ food_type }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="">All Status</option>
+                            <option value="Available" {{ 'selected' if selected_status == 'Available' }}>Available</option>
+                            <option value="Claimed" {{ 'selected' if selected_status == 'Claimed' }}>Claimed</option>
+                            <option value="Expired" {{ 'selected' if selected_status == 'Expired' }}>Expired</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="expiring_soon" class="form-label">Urgency</label>
+                        <select class="form-select" id="expiring_soon" name="expiring_soon">
+                            <option value="">All Items</option>
+                            <option value="true" {{ 'selected' if expiring_soon_filter }}>Expiring Soon (3 days)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Apply Filters
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Food Items -->
+<div class="row">
+    {% if food_items %}
+        {% for item in food_items %}
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card h-100 food-item-card" data-expiry="{{ item[4] }}">
+                <div class="card-header d-flex justify-content-between">
+                    <h6 class="mb-0">{{ item[1] }}</h6>
+                    {% if item[12] == 'Available' %}
+                        <span class="badge bg-success">Available</span>
+                    {% elif item[12] == 'Claimed' %}
+                        <span class="badge bg-info">Claimed</span>
+                    {% else %}
+                        <span class="badge bg-secondary">{{ item[12] }}</span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="row mb-2">
+                        <div class="col-6">
+                            <small class="text-muted">Quantity</small>
+                            <div class="fw-bold">{{ item[2] }} units</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Expiry Date</small>
+                            <div class="fw-bold expiry-date-text" data-expiry="{{ item[4] }}">
+                                {{ item[4] }}
+                                <br><small class="expiry-status"></small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-2">
+                        <div class="col-6">
+                            <small class="text-muted">Food Type</small>
+                            <div>{{ item[7] }}</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Meal Type</small>
+                            <div>{{ item[8] }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <small class="text-muted">Provider</small>
+                        <div>{{ item[14] if item[14] else 'Unknown Provider' }}</div>
+                        <small class="text-muted">Type: {{ item[6] }}</small>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <small class="text-muted">Location</small>
+                        <div>{{ item[9] }}</div>
+                    </div>
+                    
+                    {% if item[10] %}
+                    <div class="mb-2">
+                        <small class="text-muted">Description</small>
+                        <div class="small">{{ item[10] }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    {% if item[12] == 'Available' %}
+                        <a href="{{ url_for('add_claim') }}?food_id={{ item[0] }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-hand-paper"></i> Claim This Item
+                        </a>
+                    {% else %}
+                        <span class="text-muted">Not available for claim</span>
+                    {% endif %}
+                    <small class="float-end text-muted">
+                        Listed: {{ item[13] }}
+                    </small>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h4>No food items found</h4>
+                    <p class="text-muted">Try adjusting your filters or add a new food listing.</p>
+                    <a href="{{ url_for('add_food_listing') }}" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Add Food Listing
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Summary Statistics -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5><i class="fas fa-chart-bar"></i> Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <h4 class="text-primary">{{ food_items|length }}</h4>
+                        <p class="text-muted">Total Items Shown</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h4 class="text-success">
+                            {{ food_items|selectattr('12', 'equalto', 'Available')|list|length }}
+                        </h4>
+                        <p class="text-muted">Available Items</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h4 class="text-warning expiring-count">
+                            0
+                        </h4>
+                        <p class="text-muted">Expiring Soon</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h4 class="text-info">
+                            {{ food_items|sum(attribute='2') if food_items else 0 }}
+                        </h4>
+                        <p class="text-muted">Total Quantity</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Add current datetime for comparison
+const now = new Date();
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    updateExpiryInformation();
+});
+
+function updateExpiryInformation() {
+    let expiringCount = 0;
+    const today = new Date();
+    
+    // Update individual food items
+    document.querySelectorAll('.food-item-card').forEach(card => {
+        const expiryDate = new Date(card.dataset.expiry);
+        const timeDiff = expiryDate - today;
+        const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+        
+        // Update card styling
+        if (daysDiff <= 0) {
+            card.classList.add('expired');
+        } else if (daysDiff <= 3) {
+            card.classList.add('expiring-soon');
+            expiringCount++;
+        }
+        
+        // Update expiry date text
+        const expiryText = card.querySelector('.expiry-date-text');
+        const expiryStatus = card.querySelector('.expiry-status');
+        
+        if (expiryText) {
+            if (daysDiff <= 0) {
+                expiryText.classList.add('text-danger');
+                expiryStatus.textContent = 'EXPIRED';
+                expiryStatus.className = 'expiry-status text-danger';
+            } else if (daysDiff <= 3) {
+                expiryText.classList.add('text-warning');
+                expiryStatus.textContent = `${daysDiff} days left`;
+                expiryStatus.className = 'expiry-status text-warning';
+            } else {
+                expiryText.classList.add('text-success');
+                expiryStatus.textContent = '';
+                expiryStatus.className = 'expiry-status';
+            }
+        }
+    });
+    
+    // Update expiry badges
+    document.querySelectorAll('.expiry-badge').forEach(badge => {
+        const expiryDate = new Date(badge.dataset.expiry);
+        const timeDiff = expiryDate - today;
+        const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+        
+        const daysLeftSpan = badge.querySelector('.days-left');
+        
+        if (daysDiff <= 0) {
+            badge.className = 'badge bg-danger expiry-badge';
+            if (daysLeftSpan) daysLeftSpan.textContent = 'Expired';
+        } else if (daysDiff <= 1) {
+            badge.className = 'badge bg-danger expiry-badge';
+            if (daysLeftSpan) daysLeftSpan.textContent = 'Urgent';
+        } else if (daysDiff <= 3) {
+            badge.className = 'badge bg-warning expiry-badge';
+            if (daysLeftSpan) daysLeftSpan.textContent = 'Soon';
+        } else {
+            badge.className = 'badge bg-success expiry-badge';
+            if (daysLeftSpan) daysLeftSpan.textContent = `${daysDiff} days`;
+        }
+    });
+    
+    // Update expiring count
+    const expiringCountElement = document.querySelector('.expiring-count');
+    if (expiringCountElement) {
+        expiringCountElement.textContent = expiringCount;
+    }
+}
+</script>
+{% endblock %}

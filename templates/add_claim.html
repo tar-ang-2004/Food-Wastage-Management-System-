@@ -1,0 +1,407 @@
+{% extends "base.html" %}
+
+{% block title %}Submit Claim - Food Wastage Management{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4><i class="fas fa-clipboard-list"></i> Submit Food Claim</h4>
+                <p class="mb-0">Claim available food items for your organization or community</p>
+            </div>
+            <div class="card-body">
+                <!-- Claim Form -->
+                <form id="claimForm" method="POST" novalidate>
+                    <!-- Food Item Selection -->
+                    <div class="mb-4">
+                        <label class="form-label">
+                            <i class="fas fa-apple-alt text-primary"></i> Select Food Item <span class="text-danger">*</span>
+                        </label>
+                        {% if food_items %}
+                        <div class="row">
+                            {% for item in food_items %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card food-item-card" data-food-id="{{ item[0] }}">
+                                    <div class="card-body">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="food_id" 
+                                                   id="food_{{ item[0] }}" value="{{ item[0] }}" required>
+                                            <label class="form-check-label w-100" for="food_{{ item[0] }}">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div>
+                                                        <h6 class="mb-1">{{ item[1] }}</h6>
+                                                        <p class="text-muted mb-1">{{ item[2] }}</p>
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-weight"></i> {{ item[3] }}
+                                                        </small>
+                                                    </div>
+                                                    <div class="text-end">
+                                                        <span class="badge expiry-badge" data-expiry="{{ item[4] }}">
+                                                            <span class="days-left"></span>
+                                                        </span>
+                                                        <br>
+                                                        <small class="text-muted">Expires: {{ item[4] }}</small>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-map-marker-alt"></i> {{ item[6] }}
+                                                    </small>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="invalid-feedback">Please select a food item to claim.</div>
+                        {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            No food items are currently available for claiming. Please check back later.
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if food_items %}
+                    <!-- Receiver Selection -->
+                    <div class="mb-3">
+                        <label for="receiver_id" class="form-label">
+                            <i class="fas fa-hands-helping text-primary"></i> Receiving Organization <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-control" id="receiver_id" name="receiver_id" required>
+                            <option value="">Select receiving organization</option>
+                            {% for receiver in receivers %}
+                            <option value="{{ receiver[0] }}">{{ receiver[1] }} ({{ receiver[2] }}) - {{ receiver[3] }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">Please select a receiving organization.</div>
+                    </div>
+                    
+                    <!-- Quantity Requested -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="quantity_requested" class="form-label">
+                                <i class="fas fa-balance-scale text-primary"></i> Quantity Requested <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="quantity_requested" name="quantity_requested" required
+                                   placeholder="e.g., 10 kg, 5 boxes, 20 portions">
+                            <div class="invalid-feedback">Please specify the quantity you need.</div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="urgency" class="form-label">
+                                <i class="fas fa-exclamation-triangle text-primary"></i> Urgency Level
+                            </label>
+                            <select class="form-control" id="urgency" name="urgency">
+                                <option value="Normal">Normal</option>
+                                <option value="High">High</option>
+                                <option value="Critical">Critical</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Purpose -->
+                    <div class="mb-3">
+                        <label for="purpose" class="form-label">
+                            <i class="fas fa-heart text-primary"></i> Purpose/Need Description <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control" id="purpose" name="purpose" rows="3" required
+                                  placeholder="Describe how this food will be used (e.g., community meal, shelter residents, food bank distribution)"></textarea>
+                        <div class="invalid-feedback">Please describe the purpose for this food claim.</div>
+                    </div>
+                    
+                    <!-- Pickup/Delivery Preferences -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-truck text-primary"></i> Pickup/Delivery Preference
+                        </label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="delivery_method" 
+                                           id="pickup" value="pickup" checked>
+                                    <label class="form-check-label" for="pickup">
+                                        <i class="fas fa-car"></i> We will pick up
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="delivery_method" 
+                                           id="delivery" value="delivery">
+                                    <label class="form-check-label" for="delivery">
+                                        <i class="fas fa-shipping-fast"></i> Request delivery
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Preferred Pickup/Delivery Time -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="preferred_date" class="form-label">
+                                <i class="fas fa-calendar text-primary"></i> Preferred Date
+                            </label>
+                            <input type="date" class="form-control" id="preferred_date" name="preferred_date">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="preferred_time" class="form-label">
+                                <i class="fas fa-clock text-primary"></i> Preferred Time
+                            </label>
+                            <input type="time" class="form-control" id="preferred_time" name="preferred_time">
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Information -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="contact_person" class="form-label">
+                                <i class="fas fa-user text-primary"></i> Contact Person <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="contact_person" name="contact_person" required
+                                   placeholder="Name of person to contact">
+                            <div class="invalid-feedback">Please provide a contact person name.</div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="contact_phone" class="form-label">
+                                <i class="fas fa-phone text-primary"></i> Contact Phone <span class="text-danger">*</span>
+                            </label>
+                            <input type="tel" class="form-control" id="contact_phone" name="contact_phone" required
+                                   placeholder="Phone number for coordination">
+                            <div class="invalid-feedback">Please provide a contact phone number.</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Special Requirements -->
+                    <div class="mb-3">
+                        <label for="special_requirements" class="form-label">
+                            <i class="fas fa-clipboard-check text-primary"></i> Special Requirements
+                        </label>
+                        <textarea class="form-control" id="special_requirements" name="special_requirements" rows="2"
+                                  placeholder="Any special handling, storage, or transportation requirements"></textarea>
+                    </div>
+                    
+                    <!-- Agreement -->
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="agreement" name="agreement" required>
+                            <label class="form-check-label" for="agreement">
+                                I confirm that this food will be used for charitable purposes and will be safely distributed to those in need. <span class="text-danger">*</span>
+                            </label>
+                            <div class="invalid-feedback">You must confirm the agreement to submit this claim.</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('claims') }}" class="btn btn-secondary me-md-2">
+                            <i class="fas fa-arrow-left"></i> Back to Claims
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Submit Claim
+                        </button>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Guidelines Sidebar -->
+    <div class="col-lg-4">
+        <div class="card border-info">
+            <div class="card-header bg-light">
+                <h5><i class="fas fa-lightbulb text-info"></i> Claiming Guidelines</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success"></i>
+                        <strong>Be Realistic:</strong> Only claim what you can actually use
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success"></i>
+                        <strong>Act Quickly:</strong> Food items have limited availability
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success"></i>
+                        <strong>Coordinate:</strong> Confirm pickup/delivery with provider
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success"></i>
+                        <strong>Food Safety:</strong> Ensure proper storage and handling
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success"></i>
+                        <strong>Report Back:</strong> Update on successful distribution
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card border-warning mt-3">
+            <div class="card-header bg-light">
+                <h6><i class="fas fa-exclamation-triangle text-warning"></i> Important Notes</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <strong>Response Time:</strong> Claims are typically processed within 2-4 hours
+                </div>
+                <div class="mb-2">
+                    <strong>Confirmation:</strong> You'll receive confirmation via phone/email
+                </div>
+                <div class="mb-2">
+                    <strong>Expiry Alert:</strong> Items marked "Urgent" expire within 24 hours
+                </div>
+                <div class="mb-2">
+                    <strong>No-Show Policy:</strong> Please cancel if you cannot collect
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation and interaction
+(function() {
+    'use strict';
+    
+    const form = document.getElementById('claimForm');
+    
+    // Food item card selection
+    document.querySelectorAll('.food-item-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            if (e.target.type !== 'radio') {
+                const radio = this.querySelector('input[type="radio"]');
+                radio.checked = true;
+                updateSelectedFoodItem(radio.value);
+            }
+        });
+    });
+    
+    // Update selected food item display
+    document.querySelectorAll('input[name="food_id"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                updateSelectedFoodItem(this.value);
+            }
+        });
+    });
+    
+    // Form submission
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        if (form.checkValidity()) {
+            submitClaim();
+        }
+        
+        form.classList.add('was-validated');
+    });
+    
+    // Phone number formatting
+    document.getElementById('contact_phone').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 10) {
+            value = value.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+        }
+        e.target.value = value;
+    });
+    
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('preferred_date').min = today;
+    document.getElementById('preferred_date').value = today;
+    
+    // Calculate expiry badges
+    calculateExpiryBadges();
+})();
+
+function calculateExpiryBadges() {
+    const today = new Date();
+    document.querySelectorAll('.expiry-badge').forEach(badge => {
+        const expiryDate = new Date(badge.dataset.expiry);
+        const timeDiff = expiryDate - today;
+        const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+        
+        const daysLeftSpan = badge.querySelector('.days-left');
+        
+        if (daysDiff <= 0) {
+            badge.className = 'badge bg-danger expiry-badge';
+            daysLeftSpan.textContent = 'Expired';
+        } else if (daysDiff <= 1) {
+            badge.className = 'badge bg-danger expiry-badge';
+            daysLeftSpan.textContent = 'Urgent';
+        } else if (daysDiff <= 3) {
+            badge.className = 'badge bg-warning expiry-badge';
+            daysLeftSpan.textContent = 'Soon';
+        } else {
+            badge.className = 'badge bg-success expiry-badge';
+            daysLeftSpan.textContent = `${daysDiff} days`;
+        }
+    });
+}
+
+function updateSelectedFoodItem(foodId) {
+    // Visual feedback for selected food item
+    document.querySelectorAll('.food-item-card').forEach(card => {
+        card.classList.remove('border-primary', 'bg-light');
+    });
+    
+    const selectedCard = document.querySelector(`[data-food-id="${foodId}"]`);
+    if (selectedCard) {
+        selectedCard.classList.add('border-primary', 'bg-light');
+    }
+}
+
+function submitClaim() {
+    const formData = new FormData(document.getElementById('claimForm'));
+    
+    fetch('{{ url_for("add_claim") }}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', 'Claim submitted successfully! You will be contacted soon.');
+            setTimeout(() => {
+                window.location.href = '{{ url_for("claims") }}';
+            }, 2000);
+        } else {
+            showAlert('danger', data.message || 'Failed to submit claim. Please try again.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('danger', 'An error occurred. Please try again.');
+    });
+}
+
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const container = document.querySelector('.container-fluid');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

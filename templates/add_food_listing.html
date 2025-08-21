@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}Add Food Listing - Food Wastage Management{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-plus-circle"></i> Add Food Listing</h1>
+            <a href="{{ url_for('food_listings') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Listings
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5><i class="fas fa-utensils"></i> Food Item Details</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="foodListingForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="food_name" class="form-label">Food Name *</label>
+                                <select class="form-select" id="food_name" name="food_name" required>
+                                    <option value="">Select Food Type</option>
+                                    <option value="Bread">Bread</option>
+                                    <option value="Rice">Rice</option>
+                                    <option value="Pasta">Pasta</option>
+                                    <option value="Vegetables">Vegetables</option>
+                                    <option value="Fruits">Fruits</option>
+                                    <option value="Dairy">Dairy</option>
+                                    <option value="Chicken">Chicken</option>
+                                    <option value="Fish">Fish</option>
+                                    <option value="Soup">Soup</option>
+                                    <option value="Salad">Salad</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="quantity" class="form-label">Quantity *</label>
+                                <input type="number" class="form-control" id="quantity" name="quantity" 
+                                       min="1" max="1000" required>
+                                <div class="form-text">Number of units available</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="expiry_date" class="form-label">Expiry Date *</label>
+                                <input type="date" class="form-control" id="expiry_date" name="expiry_date" required>
+                                <div class="form-text">When does this food expire?</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="provider_id" class="form-label">Provider *</label>
+                                <select class="form-select" id="provider_id" name="provider_id" required>
+                                    <option value="">Select Provider</option>
+                                    {% for provider in providers %}
+                                        <option value="{{ provider[0] }}">{{ provider[1] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="food_type" class="form-label">Dietary Type *</label>
+                                <select class="form-select" id="food_type" name="food_type" required>
+                                    <option value="">Select Dietary Type</option>
+                                    <option value="Vegan">Vegan</option>
+                                    <option value="Vegetarian">Vegetarian</option>
+                                    <option value="Non-Vegetarian">Non-Vegetarian</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="meal_type" class="form-label">Meal Type *</label>
+                                <select class="form-select" id="meal_type" name="meal_type" required>
+                                    <option value="">Select Meal Type</option>
+                                    <option value="Breakfast">Breakfast</option>
+                                    <option value="Lunch">Lunch</option>
+                                    <option value="Dinner">Dinner</option>
+                                    <option value="Snacks">Snacks</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="location" class="form-label">Location *</label>
+                        <input type="text" class="form-control" id="location" name="location" 
+                               placeholder="e.g., Downtown Branch, Main Street Store" required>
+                        <div class="form-text">Specific location where food can be picked up</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" 
+                                  placeholder="Additional details about the food item, preparation, storage conditions, etc."></textarea>
+                        <div class="form-text">Optional: Any additional information about the food item</div>
+                    </div>
+
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6><i class="fas fa-info-circle"></i> Listing Guidelines</h6>
+                            <ul class="mb-0 small">
+                                <li>Ensure food is safe for consumption</li>
+                                <li>Provide accurate expiry dates</li>
+                                <li>Include clear pickup location</li>
+                                <li>Be responsive to claims</li>
+                                <li>Follow food safety regulations</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-success me-2">
+                                <i class="fas fa-save"></i> Create Listing
+                            </button>
+                            <a href="{{ url_for('food_listings') }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Help Card -->
+<div class="row mt-4">
+    <div class="col-md-8 offset-md-2">
+        <div class="card border-info">
+            <div class="card-header bg-info text-white">
+                <h6><i class="fas fa-question-circle"></i> Need Help?</h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><strong>Tips for successful food listings:</strong></p>
+                <ul class="mb-0">
+                    <li>List food items as soon as you know they're available</li>
+                    <li>Update quantities if amounts change</li>
+                    <li>Be specific about pickup times and conditions</li>
+                    <li>Consider packaging and transportation requirements</li>
+                    <li>Communicate clearly with receivers about pickup arrangements</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('expiry_date').setAttribute('min', today);
+    
+    // Form validation
+    const form = document.getElementById('foodListingForm');
+    form.addEventListener('submit', function(e) {
+        const expiryDate = new Date(document.getElementById('expiry_date').value);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (expiryDate < today) {
+            e.preventDefault();
+            alert('Expiry date cannot be in the past. Please select a future date.');
+            return false;
+        }
+        
+        // Check if expiry is within 24 hours and warn user
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        if (expiryDate <= tomorrow) {
+            if (!confirm('This food item expires very soon (within 24 hours). Are you sure you want to list it?')) {
+                e.preventDefault();
+                return false;
+            }
+        }
+    });
+    
+    // Auto-populate location based on provider selection
+    const providerSelect = document.getElementById('provider_id');
+    const locationInput = document.getElementById('location');
+    
+    providerSelect.addEventListener('change', function() {
+        if (this.value && !locationInput.value) {
+            // You could extend this to fetch provider location via API
+            locationInput.placeholder = 'Enter specific pickup location for this provider';
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Food Wastage Management{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+            <small class="text-muted">Food Wastage Management System Overview</small>
+        </h1>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body text-center">
+                <i class="fas fa-store fa-2x mb-2"></i>
+                <h4>{{ stats.total_providers }}</h4>
+                <p>Total Providers</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body text-center">
+                <i class="fas fa-hands-helping fa-2x mb-2"></i>
+                <h4>{{ stats.total_receivers }}</h4>
+                <p>Total Receivers</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card success-card">
+            <div class="card-body text-center">
+                <i class="fas fa-utensils fa-2x mb-2"></i>
+                <h4>{{ stats.available_food_items }}</h4>
+                <p>Available Food Items</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card pending-card">
+            <div class="card-body text-center">
+                <i class="fas fa-weight fa-2x mb-2"></i>
+                <h4>{{ stats.total_quantity }}</h4>
+                <p>Total Food Quantity</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Claims Statistics -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card success-card">
+            <div class="card-body text-center">
+                <i class="fas fa-check-circle fa-2x mb-2"></i>
+                <h4>{{ stats.successful_claims }}</h4>
+                <p>Successful Claims</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card pending-card">
+            <div class="card-body text-center">
+                <i class="fas fa-clock fa-2x mb-2"></i>
+                <h4>{{ stats.pending_claims }}</h4>
+                <p>Pending Claims</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card urgent-card">
+            <div class="card-body text-center">
+                <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                <h4>{{ stats.expiring_soon }}</h4>
+                <p>Expiring Soon (3 days)</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Action Cards -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5><i class="fas fa-plus-circle"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('add_food_listing') }}" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Add Food Listing
+                    </a>
+                    <a href="{{ url_for('add_claim') }}" class="btn btn-info">
+                        <i class="fas fa-clipboard-list"></i> Submit Claim
+                    </a>
+                    <a href="{{ url_for('add_provider') }}" class="btn btn-primary">
+                        <i class="fas fa-store"></i> Register Provider
+                    </a>
+                    <a href="{{ url_for('add_receiver') }}" class="btn btn-secondary">
+                        <i class="fas fa-hands-helping"></i> Register Receiver
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-warning text-white">
+                <h5><i class="fas fa-exclamation-triangle"></i> Urgent Alerts</h5>
+            </div>
+            <div class="card-body">
+                <div id="urgentAlerts">
+                    <div class="text-center">
+                        <div class="spinner-border text-warning" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading urgent items...</p>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <a href="{{ url_for('food_listings', expiring_soon='true') }}" class="btn btn-warning btn-sm">
+                        <i class="fas fa-list"></i> View All Expiring Items
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5><i class="fas fa-history"></i> Recent Claims Activity</h5>
+            </div>
+            <div class="card-body">
+                {% if stats.recent_claims %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Claim ID</th>
+                                    <th>Food Item</th>
+                                    <th>Receiver</th>
+                                    <th>Status</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for claim in stats.recent_claims %}
+                                <tr>
+                                    <td>{{ claim[0] }}</td>
+                                    <td>{{ claim[1] }}</td>
+                                    <td>{{ claim[2] }}</td>
+                                    <td>
+                                        {% if claim[3] == 'Completed' %}
+                                            <span class="badge bg-success">{{ claim[3] }}</span>
+                                        {% elif claim[3] == 'Pending' %}
+                                            <span class="badge bg-warning">{{ claim[3] }}</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">{{ claim[3] }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ claim[4] }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No recent claims activity.</p>
+                {% endif %}
+                <div class="mt-3">
+                    <a href="{{ url_for('claims') }}" class="btn btn-info">
+                        <i class="fas fa-list"></i> View All Claims
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Impact Metrics -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5><i class="fas fa-chart-line"></i> Impact Metrics</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <div class="card border-success">
+                            <div class="card-body">
+                                <h3 class="text-success">{{ stats.successful_claims }}</h3>
+                                <p class="text-muted">Food Items Rescued</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-info">
+                            <div class="card-body">
+                                <h3 class="text-info">{{ stats.total_providers }}</h3>
+                                <p class="text-muted">Active Partners</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-warning">
+                            <div class="card-body">
+                                <h3 class="text-warning">{{ stats.total_receivers }}</h3>
+                                <p class="text-muted">Communities Served</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Load urgent alerts
+function loadUrgentAlerts() {
+    fetch('/api/urgent_food?days=3')
+        .then(response => response.json())
+        .then(data => {
+            const alertsContainer = document.getElementById('urgentAlerts');
+            if (data.length === 0) {
+                alertsContainer.innerHTML = '<p class="text-success"><i class="fas fa-check-circle"></i> No urgent items at this time!</p>';
+            } else {
+                let html = '<div class="list-group">';
+                data.slice(0, 5).forEach(item => {
+                    const daysLeft = Math.ceil((new Date(item.expiry_date) - new Date()) / (1000 * 60 * 60 * 24));
+                    html += `
+                        <div class="list-group-item list-group-item-warning">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">${item.food_name}</h6>
+                                <small class="text-danger">${daysLeft} days left</small>
+                            </div>
+                            <p class="mb-1">Quantity: ${item.quantity} | Provider: ${item.provider_name}</p>
+                            <small>Expires: ${item.expiry_date}</small>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                if (data.length > 5) {
+                    html += `<p class="mt-2 text-muted">... and ${data.length - 5} more items</p>`;
+                }
+                alertsContainer.innerHTML = html;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading urgent alerts:', error);
+            document.getElementById('urgentAlerts').innerHTML = '<p class="text-danger">Error loading urgent alerts</p>';
+        });
+}
+
+// Load alerts on page load
+document.addEventListener('DOMContentLoaded', loadUrgentAlerts);
+
+// Refresh alerts every 5 minutes
+setInterval(loadUrgentAlerts, 300000);
+</script>
+{% endblock %}

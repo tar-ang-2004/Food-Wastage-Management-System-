@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Providers - Food Wastage Management{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-store"></i> Food Providers</h1>
+            <a href="{{ url_for('add_provider') }}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Register New Provider
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Providers Grid -->
+<div class="row">
+    {% if providers %}
+        {% for provider in providers %}
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between">
+                    <h6 class="mb-0">{{ provider[1] }}</h6>
+                    <span class="badge bg-primary">{{ provider[2] }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <small class="text-muted">
+                            <i class="fas fa-map-marker-alt"></i> Location
+                        </small>
+                        <div>{{ provider[4] }}</div>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <small class="text-muted">
+                            <i class="fas fa-phone"></i> Contact
+                        </small>
+                        <div>{{ provider[5] }}</div>
+                    </div>
+                    
+                    {% if provider[6] %}
+                    <div class="mb-2">
+                        <small class="text-muted">
+                            <i class="fas fa-envelope"></i> Email
+                        </small>
+                        <div>{{ provider[6] }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-2">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar"></i> Joined
+                        </small>
+                        <div>{{ provider[7] }}</div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Provider ID: {{ provider[0] }}</small>
+                        <a href="{{ url_for('food_listings') }}?provider_id={{ provider[0] }}" 
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-utensils"></i> View Food Items
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-store fa-3x text-muted mb-3"></i>
+                    <h4>No providers registered yet</h4>
+                    <p class="text-muted">Be the first to register as a food provider and help reduce food waste in your community.</p>
+                    <a href="{{ url_for('add_provider') }}" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Register as Provider
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Provider Statistics -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5><i class="fas fa-chart-bar"></i> Provider Statistics</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="card border-primary">
+                            <div class="card-body">
+                                <h3 class="text-primary">{{ providers|length }}</h3>
+                                <p class="text-muted">Total Providers</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-success">
+                            <div class="card-body">
+                                <h3 class="text-success">
+                                    {{ providers|selectattr('2', 'equalto', 'Restaurant')|list|length }}
+                                </h3>
+                                <p class="text-muted">Restaurants</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-info">
+                            <div class="card-body">
+                                <h3 class="text-info">
+                                    {{ providers|selectattr('2', 'equalto', 'Grocery Store')|list|length }}
+                                </h3>
+                                <p class="text-muted">Grocery Stores</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-warning">
+                            <div class="card-body">
+                                <h3 class="text-warning">
+                                    {{ providers|selectattr('2', 'equalto', 'Supermarket')|list|length }}
+                                </h3>
+                                <p class="text-muted">Supermarkets</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Provider Types Breakdown -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5><i class="fas fa-list"></i> Provider Types Breakdown</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Provider Type</th>
+                                <th>Count</th>
+                                <th>Percentage</th>
+                                <th>Top Cities</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set provider_types = providers|groupby('2') %}
+                            {% for type, type_providers in provider_types %}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-primary">{{ type }}</span>
+                                </td>
+                                <td>{{ type_providers|list|length }}</td>
+                                <td>
+                                    {% if providers|length > 0 %}
+                                        {{ ((type_providers|list|length / providers|length) * 100)|round(1) }}%
+                                    {% else %}
+                                        0%
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% set cities = type_providers|groupby('4')|sort(attribute='1', reverse=true) %}
+                                    {% for city, city_providers in cities[:3] %}
+                                        <span class="badge bg-secondary me-1">{{ city }} ({{ city_providers|list|length }})</span>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

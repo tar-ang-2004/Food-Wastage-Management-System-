@@ -1,0 +1,366 @@
+{% extends "base.html" %}
+
+{% block title %}Register as Receiver - Food Wastage Management{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4><i class="fas fa-hands-helping"></i> Register as Food Receiver</h4>
+                <p class="mb-0">Join our network to receive food donations and help reduce food waste</p>
+            </div>
+            <div class="card-body">
+                <!-- Registration Form -->
+                <form id="receiverForm" method="POST" novalidate>
+                    <div class="row">
+                        <!-- Organization/Name -->
+                        <div class="col-md-6 mb-3">
+                            <label for="name" class="form-label">
+                                <i class="fas fa-building text-primary"></i> Organization/Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="name" name="name" required
+                                   placeholder="Enter organization or individual name">
+                            <div class="invalid-feedback">Please provide a valid name.</div>
+                        </div>
+                        
+                        <!-- Receiver Type -->
+                        <div class="col-md-6 mb-3">
+                            <label for="type" class="form-label">
+                                <i class="fas fa-tag text-primary"></i> Receiver Type <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-control" id="type" name="type" required>
+                                <option value="">Select receiver type</option>
+                                <option value="NGO">NGO (Non-Governmental Organization)</option>
+                                <option value="Charity">Charity Organization</option>
+                                <option value="Shelter">Shelter/Housing Facility</option>
+                                <option value="Individual">Individual Recipient</option>
+                                <option value="Community Center">Community Center</option>
+                                <option value="Religious Organization">Religious Organization</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <div class="invalid-feedback">Please select a receiver type.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <!-- Location -->
+                        <div class="col-md-6 mb-3">
+                            <label for="location" class="form-label">
+                                <i class="fas fa-map-marker-alt text-primary"></i> Location <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="location" name="location" required
+                                   placeholder="City, State or Full Address">
+                            <div class="invalid-feedback">Please provide your location.</div>
+                        </div>
+                        
+                        <!-- Phone -->
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label">
+                                <i class="fas fa-phone text-primary"></i> Phone Number <span class="text-danger">*</span>
+                            </label>
+                            <input type="tel" class="form-control" id="phone" name="phone" required
+                                   placeholder="Enter contact number" pattern="[0-9+\-\s\(\)]{10,15}">
+                            <div class="invalid-feedback">Please provide a valid phone number.</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label for="email" class="form-label">
+                            <i class="fas fa-envelope text-primary"></i> Email Address
+                        </label>
+                        <input type="email" class="form-control" id="email" name="email"
+                               placeholder="Enter email address (optional)">
+                        <div class="invalid-feedback">Please provide a valid email address.</div>
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="mb-3">
+                        <label for="description" class="form-label">
+                            <i class="fas fa-info-circle text-primary"></i> Organization Description
+                        </label>
+                        <textarea class="form-control" id="description" name="description" rows="3"
+                                  placeholder="Brief description of your organization or how you help the community"></textarea>
+                    </div>
+                    
+                    <!-- Capacity Information -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="capacity" class="form-label">
+                                <i class="fas fa-users text-primary"></i> People Served
+                            </label>
+                            <input type="number" class="form-control" id="capacity" name="capacity" min="1"
+                                   placeholder="Number of people you can serve">
+                            <small class="form-text text-muted">Approximate number of people you serve regularly</small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="operational_hours" class="form-label">
+                                <i class="fas fa-clock text-primary"></i> Operational Hours
+                            </label>
+                            <input type="text" class="form-control" id="operational_hours" name="operational_hours"
+                                   placeholder="e.g., 9 AM - 5 PM, Monday to Friday">
+                            <small class="form-text text-muted">When can you receive food donations?</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Special Requirements -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-clipboard-check text-primary"></i> Special Requirements
+                        </label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="vegetarian" name="preferences" value="vegetarian">
+                                    <label class="form-check-label" for="vegetarian">Vegetarian Food Only</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="halal" name="preferences" value="halal">
+                                    <label class="form-check-label" for="halal">Halal Food Only</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="kosher" name="preferences" value="kosher">
+                                    <label class="form-check-label" for="kosher">Kosher Food Only</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="refrigeration" name="facilities" value="refrigeration">
+                                    <label class="form-check-label" for="refrigeration">Refrigeration Available</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="transportation" name="facilities" value="transportation">
+                                    <label class="form-check-label" for="transportation">Transportation Available</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="volunteers" name="facilities" value="volunteers">
+                                    <label class="form-check-label" for="volunteers">Volunteers Available</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Terms and Conditions -->
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
+                            <label class="form-check-label" for="terms">
+                                I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and Conditions</a> <span class="text-danger">*</span>
+                            </label>
+                            <div class="invalid-feedback">You must agree to the terms and conditions.</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('receivers') }}" class="btn btn-secondary me-md-2">
+                            <i class="fas fa-arrow-left"></i> Back to Receivers
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check"></i> Register as Receiver
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Benefits Sidebar -->
+    <div class="col-lg-4">
+        <div class="card border-success">
+            <div class="card-header bg-light">
+                <h5><i class="fas fa-star text-success"></i> Benefits of Joining</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <strong>Free Food Access:</strong> Receive quality food donations at no cost
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <strong>Regular Supply:</strong> Connect with multiple food providers
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <strong>Community Impact:</strong> Help reduce food waste in your area
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <strong>Easy Claims:</strong> Simple process to claim available food
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <strong>Network Support:</strong> Connect with other organizations
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card border-info mt-3">
+            <div class="card-header bg-light">
+                <h6><i class="fas fa-info-circle text-info"></i> How It Works</h6>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="mb-3">
+                        <div class="badge bg-primary rounded-circle me-2">1</div>
+                        <strong>Register:</strong> Complete this form to join our network
+                    </div>
+                    <div class="mb-3">
+                        <div class="badge bg-primary rounded-circle me-2">2</div>
+                        <strong>Browse:</strong> View available food listings from providers
+                    </div>
+                    <div class="mb-3">
+                        <div class="badge bg-primary rounded-circle me-2">3</div>
+                        <strong>Claim:</strong> Submit claims for food items you need
+                    </div>
+                    <div class="mb-3">
+                        <div class="badge bg-primary rounded-circle me-2">4</div>
+                        <strong>Receive:</strong> Coordinate pickup or delivery with providers
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Terms and Conditions Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Terms and Conditions for Receivers</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>1. Eligibility</h6>
+                <p>Organizations and individuals must demonstrate genuine need and ability to distribute food to those who need it.</p>
+                
+                <h6>2. Food Safety</h6>
+                <p>Receivers must follow proper food safety guidelines and ensure safe storage and distribution of received food items.</p>
+                
+                <h6>3. Non-Discrimination</h6>
+                <p>Food must be distributed without discrimination based on race, religion, gender, or other protected characteristics.</p>
+                
+                <h6>4. Reporting</h6>
+                <p>Receivers may be asked to provide periodic reports on food distribution and impact in the community.</p>
+                
+                <h6>5. No Resale</h6>
+                <p>Received food items cannot be sold or used for commercial purposes.</p>
+                
+                <h6>6. Platform Use</h6>
+                <p>Users must use the platform responsibly and provide accurate information about their organization and needs.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" onclick="acceptTerms()">Accept Terms</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation
+(function() {
+    'use strict';
+    
+    const form = document.getElementById('receiverForm');
+    
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        if (form.checkValidity()) {
+            // Additional custom validation
+            const phone = document.getElementById('phone').value;
+            const phonePattern = /^[+]?[\d\s\-\(\)]{10,15}$/;
+            
+            if (!phonePattern.test(phone)) {
+                document.getElementById('phone').setCustomValidity('Please enter a valid phone number');
+                document.getElementById('phone').classList.add('is-invalid');
+                return;
+            } else {
+                document.getElementById('phone').setCustomValidity('');
+                document.getElementById('phone').classList.remove('is-invalid');
+            }
+            
+            // Submit form
+            submitForm();
+        }
+        
+        form.classList.add('was-validated');
+    });
+    
+    // Phone number formatting
+    document.getElementById('phone').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 10) {
+            value = value.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+        }
+        e.target.value = value;
+    });
+})();
+
+function acceptTerms() {
+    document.getElementById('terms').checked = true;
+    document.getElementById('terms').classList.remove('is-invalid');
+    const modal = bootstrap.Modal.getInstance(document.getElementById('termsModal'));
+    modal.hide();
+}
+
+function submitForm() {
+    const formData = new FormData(document.getElementById('receiverForm'));
+    
+    // Collect preferences and facilities
+    const preferences = Array.from(document.querySelectorAll('input[name="preferences"]:checked'))
+                           .map(cb => cb.value);
+    const facilities = Array.from(document.querySelectorAll('input[name="facilities"]:checked'))
+                          .map(cb => cb.value);
+    
+    formData.append('preferences', preferences.join(','));
+    formData.append('facilities', facilities.join(','));
+    
+    fetch('{{ url_for("add_receiver") }}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', 'Registration successful! Welcome to our network.');
+            setTimeout(() => {
+                window.location.href = '{{ url_for("receivers") }}';
+            }, 2000);
+        } else {
+            showAlert('danger', data.message || 'Registration failed. Please try again.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('danger', 'An error occurred. Please try again.');
+    });
+}
+
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const container = document.querySelector('.container-fluid');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block title %}Receivers - Food Wastage Management{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-hands-helping"></i> Food Receivers</h1>
+            <a href="{{ url_for('add_receiver') }}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Register New Receiver
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Receivers Grid -->
+<div class="row">
+    {% if receivers %}
+        {% for receiver in receivers %}
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between">
+                    <h6 class="mb-0">{{ receiver[1] }}</h6>
+                    {% if receiver[2] == 'NGO' %}
+                        <span class="badge bg-success">{{ receiver[2] }}</span>
+                    {% elif receiver[2] == 'Shelter' %}
+                        <span class="badge bg-info">{{ receiver[2] }}</span>
+                    {% elif receiver[2] == 'Charity' %}
+                        <span class="badge bg-warning">{{ receiver[2] }}</span>
+                    {% else %}
+                        <span class="badge bg-secondary">{{ receiver[2] }}</span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <small class="text-muted">
+                            <i class="fas fa-map-marker-alt"></i> Location
+                        </small>
+                        <div>{{ receiver[3] }}</div>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <small class="text-muted">
+                            <i class="fas fa-phone"></i> Contact
+                        </small>
+                        <div>{{ receiver[4] }}</div>
+                    </div>
+                    
+                    {% if receiver[5] %}
+                    <div class="mb-2">
+                        <small class="text-muted">
+                            <i class="fas fa-envelope"></i> Email
+                        </small>
+                        <div>{{ receiver[5] }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-2">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar"></i> Joined
+                        </small>
+                        <div>{{ receiver[6] }}</div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Receiver ID: {{ receiver[0] }}</small>
+                        <a href="{{ url_for('claims') }}?receiver_id={{ receiver[0] }}" 
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-clipboard-list"></i> View Claims
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-hands-helping fa-3x text-muted mb-3"></i>
+                    <h4>No receivers registered yet</h4>
+                    <p class="text-muted">Register your organization or yourself to start receiving food donations and help reduce food waste.</p>
+                    <a href="{{ url_for('add_receiver') }}" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Register as Receiver
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Receiver Statistics -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5><i class="fas fa-chart-bar"></i> Receiver Statistics</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="card border-primary">
+                            <div class="card-body">
+                                <h3 class="text-primary">{{ receivers|length }}</h3>
+                                <p class="text-muted">Total Receivers</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-success">
+                            <div class="card-body">
+                                <h3 class="text-success">
+                                    {{ receivers|selectattr('2', 'equalto', 'NGO')|list|length }}
+                                </h3>
+                                <p class="text-muted">NGOs</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-info">
+                            <div class="card-body">
+                                <h3 class="text-info">
+                                    {{ receivers|selectattr('2', 'equalto', 'Shelter')|list|length }}
+                                </h3>
+                                <p class="text-muted">Shelters</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-warning">
+                            <div class="card-body">
+                                <h3 class="text-warning">
+                                    {{ receivers|selectattr('2', 'equalto', 'Charity')|list|length }}
+                                </h3>
+                                <p class="text-muted">Charities</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Receiver Types Breakdown -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5><i class="fas fa-list"></i> Receiver Types & Impact</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Receiver Type</th>
+                                <th>Count</th>
+                                <th>Percentage</th>
+                                <th>Primary Locations</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set receiver_types = receivers|groupby('2') %}
+                            {% for type, type_receivers in receiver_types %}
+                            <tr>
+                                <td>
+                                    {% if type == 'NGO' %}
+                                        <span class="badge bg-success">{{ type }}</span>
+                                    {% elif type == 'Shelter' %}
+                                        <span class="badge bg-info">{{ type }}</span>
+                                    {% elif type == 'Charity' %}
+                                        <span class="badge bg-warning">{{ type }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ type }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ type_receivers|list|length }}</td>
+                                <td>
+                                    {% if receivers|length > 0 %}
+                                        {{ ((type_receivers|list|length / receivers|length) * 100)|round(1) }}%
+                                    {% else %}
+                                        0%
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% set cities = type_receivers|groupby('3')|sort(attribute='1', reverse=true) %}
+                                    {% for city, city_receivers in cities[:3] %}
+                                        <span class="badge bg-secondary me-1">{{ city }} ({{ city_receivers|list|length }})</span>
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        {% if type == 'NGO' %}
+                                            Non-profit organizations working for social causes
+                                        {% elif type == 'Shelter' %}
+                                            Temporary housing facilities for those in need
+                                        {% elif type == 'Charity' %}
+                                            Charitable organizations providing community support
+                                        {% elif type == 'Individual' %}
+                                            Individual recipients in need of food assistance
+                                        {% else %}
+                                            Other types of food recipients
+                                        {% endif %}
+                                    </small>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Impact Information -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-success">
+            <div class="card-header bg-success text-white">
+                <h5><i class="fas fa-heart"></i> Community Impact</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i class="fas fa-users fa-3x text-success mb-2"></i>
+                            <h5>{{ receivers|length }}</h5>
+                            <p class="text-muted">Organizations & Individuals<br>Ready to Receive Food</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i class="fas fa-map-marked-alt fa-3x text-info mb-2"></i>
+                            <h5>{{ receivers|map(attribute='3')|unique|list|length }}</h5>
+                            <p class="text-muted">Cities Covered<br>Across the Network</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i class="fas fa-handshake fa-3x text-warning mb-2"></i>
+                            <h5>{{ receivers|groupby('2')|list|length }}</h5>
+                            <p class="text-muted">Types of Organizations<br>Working Together</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

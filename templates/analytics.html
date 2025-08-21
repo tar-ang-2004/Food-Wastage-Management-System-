@@ -1,0 +1,679 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - Food Wastage Management{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-chart-bar"></i> Analytics Dashboard
+            <small class="text-muted">System Performance Insights</small>
+        </h1>
+    </div>
+</div>
+
+<!-- Key Metrics -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card success-card">
+            <div class="card-body text-center text-white">
+                <i class="fas fa-save fa-2x mb-2"></i>
+                <h4>{{ data.waste_metrics.saved }}</h4>
+                <p>Food Units Saved</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card urgent-card">
+            <div class="card-body text-center text-white">
+                <i class="fas fa-times fa-2x mb-2"></i>
+                <h4>{{ data.waste_metrics.cancelled }}</h4>
+                <p>Cancelled Claims</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body text-center text-white">
+                <i class="fas fa-percentage fa-2x mb-2"></i>
+                <h4>
+                    {% if data.waste_metrics.total > 0 %}
+                        {{ ((data.waste_metrics.saved / data.waste_metrics.total) * 100)|round(1) }}%
+                    {% else %}
+                        0%
+                    {% endif %}
+                </h4>
+                <p>Success Rate</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card pending-card">
+            <div class="card-body text-center text-white">
+                <i class="fas fa-recycle fa-2x mb-2"></i>
+                <h4>{{ data.waste_metrics.total }}</h4>
+                <p>Total Food Units</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row 1 -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5><i class="fas fa-pie-chart"></i> Claims by Status</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="claimsStatusChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5><i class="fas fa-chart-pie"></i> Food Types Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="foodTypesChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row 2 -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5><i class="fas fa-store"></i> Provider Types</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="providerTypesChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-warning text-white">
+                <h5><i class="fas fa-hands-helping"></i> Receiver Types</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="receiverTypesChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Monthly Trends -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5><i class="fas fa-line-chart"></i> Monthly Claims Trend</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="monthlyTrendsChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Statistics Tables -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5><i class="fas fa-table"></i> Claims Breakdown</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Count</th>
+                            <th>Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set total_claims = data.claims_by_status.values()|sum %}
+                        {% for status, count in data.claims_by_status.items() %}
+                        <tr>
+                            <td>
+                                {% if status == 'Completed' %}
+                                    <span class="badge bg-success">{{ status }}</span>
+                                {% elif status == 'Pending' %}
+                                    <span class="badge bg-warning">{{ status }}</span>
+                                {% else %}
+                                    <span class="badge bg-danger">{{ status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ count }}</td>
+                            <td>
+                                {% if total_claims > 0 %}
+                                    {{ ((count / total_claims) * 100)|round(1) }}%
+                                {% else %}
+                                    0%
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5><i class="fas fa-utensils"></i> Food Types Breakdown</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Food Type</th>
+                            <th>Count</th>
+                            <th>Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set total_food = data.food_types_dist.values()|sum %}
+                        {% for food_type, count in data.food_types_dist.items() %}
+                        <tr>
+                            <td>{{ food_type }}</td>
+                            <td>{{ count }}</td>
+                            <td>
+                                {% if total_food > 0 %}
+                                    {{ ((count / total_food) * 100)|round(1) }}%
+                                {% else %}
+                                    0%
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Insights -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-gradient-primary text-white">
+                <h5><i class="fas fa-lightbulb"></i> System Insights & Recommendations</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-check-circle text-success"></i> Positive Trends</h6>
+                        <ul class="list-unstyled">
+                            {% if data.waste_metrics.saved > 0 %}
+                                <li><i class="fas fa-arrow-up text-success"></i> {{ data.waste_metrics.saved }} food units successfully distributed</li>
+                            {% endif %}
+                            {% if data.claims_by_status.get('Completed', 0) > 0 %}
+                                <li><i class="fas fa-handshake text-success"></i> {{ data.claims_by_status.get('Completed', 0) }} successful food rescues</li>
+                            {% endif %}
+                            <li><i class="fas fa-network-wired text-success"></i> {{ data.provider_types_dist|length }} provider types actively participating</li>
+                            <li><i class="fas fa-users text-success"></i> {{ data.receiver_types_dist|length }} receiver categories being served</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-exclamation-triangle text-warning"></i> Areas for Improvement</h6>
+                        <ul class="list-unstyled">
+                            {% if data.claims_by_status.get('Cancelled', 0) > 0 %}
+                                <li><i class="fas fa-times text-danger"></i> {{ data.claims_by_status.get('Cancelled', 0) }} cancelled claims - investigate reasons</li>
+                            {% endif %}
+                            {% if data.claims_by_status.get('Pending', 0) > 0 %}
+                                <li><i class="fas fa-clock text-warning"></i> {{ data.claims_by_status.get('Pending', 0) }} pending claims need attention</li>
+                            {% endif %}
+                            <li><i class="fas fa-chart-line text-info"></i> Monitor seasonal trends for better planning</li>
+                            <li><i class="fas fa-bell text-info"></i> Implement alerts for urgent food items</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Query Section -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5><i class="fas fa-code"></i> Custom SQL Query Tool</h5>
+                <p class="mb-0">Execute custom SELECT queries to get specific insights from the database</p>
+            </div>
+            <div class="card-body">
+                <!-- Query Suggestions -->
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <label class="form-label"><i class="fas fa-lightbulb"></i> Quick Query Suggestions:</label>
+                        <div class="d-flex flex-wrap gap-2" id="querySuggestions">
+                            <!-- Suggestions will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Query Input -->
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <label for="customQuery" class="form-label"><i class="fas fa-terminal"></i> SQL Query:</label>
+                        <textarea class="form-control font-monospace" id="customQuery" name="customQuery" rows="6" 
+                                  placeholder="Enter your SELECT query here...&#10;Example: SELECT * FROM providers WHERE type = 'Restaurant';"></textarea>
+                        <div class="form-text">
+                            <strong>Security Note:</strong> Only SELECT queries are allowed. No data modification is permitted.
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Execute Button -->
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <button type="button" class="btn btn-primary" onclick="executeCustomQuery()">
+                            <i class="fas fa-play"></i> Execute Query
+                        </button>
+                        <button type="button" class="btn btn-secondary ms-2" onclick="clearQuery()">
+                            <i class="fas fa-eraser"></i> Clear
+                        </button>
+                        <button type="button" class="btn btn-info ms-2" onclick="showDatabaseSchema()">
+                            <i class="fas fa-database"></i> Show Schema
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Results Section -->
+                <div id="queryResults" style="display: none;">
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6><i class="fas fa-table"></i> Query Results</h6>
+                        <div>
+                            <span id="resultCount" class="badge bg-info"></span>
+                            <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="exportResults()">
+                                <i class="fas fa-download"></i> Export CSV
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover" id="resultsTable">
+                            <thead class="table-dark">
+                                <tr id="resultsHeader"></tr>
+                            </thead>
+                            <tbody id="resultsBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Error Display -->
+                <div id="queryError" class="alert alert-danger" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span id="errorMessage"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Database Schema Modal -->
+<div class="modal fade" id="schemaModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-database"></i> Database Schema</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-table"></i> Tables Overview</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <strong>providers</strong> - Food providers (restaurants, stores)
+                                <br><small class="text-muted">provider_id, name, type, address, city, contact, email, registration_date</small>
+                            </li>
+                            <li class="list-group-item">
+                                <strong>receivers</strong> - Food receivers (NGOs, shelters)
+                                <br><small class="text-muted">receiver_id, name, type, city, contact, email, registration_date</small>
+                            </li>
+                            <li class="list-group-item">
+                                <strong>food_listings</strong> - Available food items
+                                <br><small class="text-muted">food_id, food_name, quantity, food_type, expiry_date, status, provider_id, date_listed</small>
+                            </li>
+                            <li class="list-group-item">
+                                <strong>claims</strong> - Food claim requests
+                                <br><small class="text-muted">claim_id, food_id, receiver_id, status, notes, timestamp</small>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-link"></i> Common Joins</h6>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <code class="d-block mb-2">
+                                    -- Food items with provider info<br>
+                                    SELECT f.*, p.name<br>
+                                    FROM food_listings f<br>
+                                    JOIN providers p ON f.provider_id = p.provider_id
+                                </code>
+                                <code class="d-block mb-2">
+                                    -- Claims with details<br>
+                                    SELECT c.*, f.food_name, r.name<br>
+                                    FROM claims c<br>
+                                    JOIN food_listings f ON c.food_id = f.food_id<br>
+                                    JOIN receivers r ON c.receiver_id = r.receiver_id
+                                </code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Chart.js configurations
+const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: {
+            position: 'bottom'
+        }
+    }
+};
+
+// Claims Status Chart
+const claimsStatusCtx = document.getElementById('claimsStatusChart').getContext('2d');
+new Chart(claimsStatusCtx, {
+    type: 'doughnut',
+    data: {
+        labels: {{ data.claims_by_status.keys()|list|tojson }},
+        datasets: [{
+            data: {{ data.claims_by_status.values()|list|tojson }},
+            backgroundColor: [
+                '#28a745', // Completed - Green
+                '#ffc107', // Pending - Yellow
+                '#dc3545'  // Cancelled - Red
+            ]
+        }]
+    },
+    options: chartOptions
+});
+
+// Food Types Chart
+const foodTypesCtx = document.getElementById('foodTypesChart').getContext('2d');
+new Chart(foodTypesCtx, {
+    type: 'pie',
+    data: {
+        labels: {{ data.food_types_dist.keys()|list|tojson }},
+        datasets: [{
+            data: {{ data.food_types_dist.values()|list|tojson }},
+            backgroundColor: [
+                '#007bff', '#28a745', '#ffc107', '#dc3545', 
+                '#6f42c1', '#fd7e14', '#20c997', '#6c757d'
+            ]
+        }]
+    },
+    options: chartOptions
+});
+
+// Provider Types Chart
+const providerTypesCtx = document.getElementById('providerTypesChart').getContext('2d');
+new Chart(providerTypesCtx, {
+    type: 'bar',
+    data: {
+        labels: {{ data.provider_types_dist.keys()|list|tojson }},
+        datasets: [{
+            label: 'Number of Providers',
+            data: {{ data.provider_types_dist.values()|list|tojson }},
+            backgroundColor: '#17a2b8'
+        }]
+    },
+    options: {
+        ...chartOptions,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// Receiver Types Chart
+const receiverTypesCtx = document.getElementById('receiverTypesChart').getContext('2d');
+new Chart(receiverTypesCtx, {
+    type: 'bar',
+    data: {
+        labels: {{ data.receiver_types_dist.keys()|list|tojson }},
+        datasets: [{
+            label: 'Number of Receivers',
+            data: {{ data.receiver_types_dist.values()|list|tojson }},
+            backgroundColor: '#fd7e14'
+        }]
+    },
+    options: {
+        ...chartOptions,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// Monthly Trends Chart
+const monthlyTrendsCtx = document.getElementById('monthlyTrendsChart').getContext('2d');
+new Chart(monthlyTrendsCtx, {
+    type: 'line',
+    data: {
+        labels: {{ data.monthly_trends.keys()|list|tojson }},
+        datasets: [{
+            label: 'Claims per Month',
+            data: {{ data.monthly_trends.values()|list|tojson }},
+            borderColor: '#007bff',
+            backgroundColor: 'rgba(0, 123, 255, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        ...chartOptions,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// Auto-refresh analytics every 5 minutes
+setInterval(function() {
+    console.log('Analytics data could be refreshed here...');
+}, 300000);
+
+// Custom Query Functions
+function loadQuerySuggestions() {
+    fetch('/analytics/query-suggestions')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const container = document.getElementById('querySuggestions');
+                container.innerHTML = '';
+                
+                data.suggestions.forEach(suggestion => {
+                    const button = document.createElement('button');
+                    button.className = 'btn btn-outline-primary btn-sm me-2 mb-2';
+                    button.textContent = suggestion.title;
+                    button.onclick = () => {
+                        document.getElementById('customQuery').value = suggestion.query;
+                    };
+                    container.appendChild(button);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading suggestions:', error);
+        });
+}
+
+function executeCustomQuery() {
+    const query = document.getElementById('customQuery').value.trim();
+    
+    if (!query) {
+        showQueryError('Please enter a SQL query');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('query', query);
+    
+    // Show loading state
+    const executeBtn = document.querySelector('button[onclick="executeCustomQuery()"]');
+    const originalText = executeBtn.innerHTML;
+    executeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Executing...';
+    executeBtn.disabled = true;
+    
+    fetch('/analytics/custom-query', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        executeBtn.innerHTML = originalText;
+        executeBtn.disabled = false;
+        
+        if (data.success) {
+            displayQueryResults(data);
+            hideQueryError();
+        } else {
+            showQueryError(data.error);
+            hideQueryResults();
+        }
+    })
+    .catch(error => {
+        executeBtn.innerHTML = originalText;
+        executeBtn.disabled = false;
+        showQueryError('Network error: ' + error.message);
+        hideQueryResults();
+    });
+}
+
+function displayQueryResults(data) {
+    const resultsSection = document.getElementById('queryResults');
+    const resultsHeader = document.getElementById('resultsHeader');
+    const resultsBody = document.getElementById('resultsBody');
+    const resultCount = document.getElementById('resultCount');
+    
+    // Clear previous results
+    resultsHeader.innerHTML = '';
+    resultsBody.innerHTML = '';
+    
+    if (data.data.length === 0) {
+        resultsBody.innerHTML = '<tr><td colspan="100%" class="text-center text-muted">No results found</td></tr>';
+        resultCount.textContent = '0 rows';
+    } else {
+        // Create header
+        data.columns.forEach(column => {
+            const th = document.createElement('th');
+            th.textContent = column;
+            resultsHeader.appendChild(th);
+        });
+        
+        // Create rows
+        data.data.forEach(row => {
+            const tr = document.createElement('tr');
+            row.forEach(cell => {
+                const td = document.createElement('td');
+                td.textContent = cell !== null ? cell : 'NULL';
+                if (cell === null) {
+                    td.classList.add('text-muted');
+                    td.style.fontStyle = 'italic';
+                }
+                tr.appendChild(td);
+            });
+            resultsBody.appendChild(tr);
+        });
+        
+        resultCount.textContent = `${data.row_count} rows`;
+    }
+    
+    resultsSection.style.display = 'block';
+}
+
+function hideQueryResults() {
+    document.getElementById('queryResults').style.display = 'none';
+}
+
+function showQueryError(message) {
+    const errorDiv = document.getElementById('queryError');
+    const errorMessage = document.getElementById('errorMessage');
+    errorMessage.textContent = message;
+    errorDiv.style.display = 'block';
+}
+
+function hideQueryError() {
+    document.getElementById('queryError').style.display = 'none';
+}
+
+function clearQuery() {
+    document.getElementById('customQuery').value = '';
+    hideQueryResults();
+    hideQueryError();
+}
+
+function showDatabaseSchema() {
+    const modal = new bootstrap.Modal(document.getElementById('schemaModal'));
+    modal.show();
+}
+
+function exportResults() {
+    const table = document.getElementById('resultsTable');
+    const rows = table.querySelectorAll('tr');
+    let csv = '';
+    
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('th, td');
+        const rowData = Array.from(cells).map(cell => {
+            let value = cell.textContent;
+            // Escape quotes and wrap in quotes if contains comma
+            if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+                value = '"' + value.replace(/"/g, '""') + '"';
+            }
+            return value;
+        });
+        csv += rowData.join(',') + '\n';
+    });
+    
+    // Download CSV
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'query_results.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+
+// Initialize custom query functionality when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Load query suggestions if on analytics page
+    if (document.getElementById('querySuggestions')) {
+        loadQuerySuggestions();
+    }
+});
+</script>
+{% endblock %}

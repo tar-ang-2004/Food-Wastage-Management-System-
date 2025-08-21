@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block title %}Claims - Food Wastage Management{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-clipboard-list"></i> Claims Management</h1>
+            <a href="{{ url_for('add_claim') }}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Submit New Claim
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Status Filter -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-filter"></i> Filter by Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="btn-group" role="group">
+                    <a href="{{ url_for('claims') }}" 
+                       class="btn {{ 'btn-primary' if not selected_status else 'btn-outline-primary' }}">
+                        All Claims
+                    </a>
+                    <a href="{{ url_for('claims', status='Pending') }}" 
+                       class="btn {{ 'btn-warning' if selected_status == 'Pending' else 'btn-outline-warning' }}">
+                        Pending
+                    </a>
+                    <a href="{{ url_for('claims', status='Completed') }}" 
+                       class="btn {{ 'btn-success' if selected_status == 'Completed' else 'btn-outline-success' }}">
+                        Completed
+                    </a>
+                    <a href="{{ url_for('claims', status='Cancelled') }}" 
+                       class="btn {{ 'btn-danger' if selected_status == 'Cancelled' else 'btn-outline-danger' }}">
+                        Cancelled
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Claims Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5><i class="fas fa-list"></i> Claims List</h5>
+            </div>
+            <div class="card-body">
+                {% if claims %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Claim ID</th>
+                                    <th>Food Item</th>
+                                    <th>Quantity</th>
+                                    <th>Receiver</th>
+                                    <th>Receiver Type</th>
+                                    <th>Status</th>
+                                    <th>Submitted</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for claim in claims %}
+                                <tr>
+                                    <td>
+                                        <strong>#{{ claim[0] }}</strong>
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-utensils text-muted"></i>
+                                        {{ claim[1] }}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ claim[2] }} units</span>
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-user text-muted"></i>
+                                        {{ claim[3] }}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ claim[4] }}</span>
+                                    </td>
+                                    <td>
+                                        {% if claim[5] == 'Completed' %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check"></i> {{ claim[5] }}
+                                            </span>
+                                        {% elif claim[5] == 'Pending' %}
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-clock"></i> {{ claim[5] }}
+                                            </span>
+                                        {% elif claim[5] == 'Cancelled' %}
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-times"></i> {{ claim[5] }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small>{{ claim[6] }}</small>
+                                    </td>
+                                    <td>
+                                        {% if claim[5] == 'Pending' %}
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <button type="button" class="btn btn-success btn-sm" 
+                                                        onclick="updateClaimStatus({{ claim[0] }}, 'Completed')">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-danger btn-sm" 
+                                                        onclick="updateClaimStatus({{ claim[0] }}, 'Cancelled')">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        {% else %}
+                                            <span class="text-muted">No actions</span>
+                                        {% endif %}
+                                        
+                                        {% if claim[7] %}
+                                            <button type="button" class="btn btn-outline-info btn-sm ms-1" 
+                                                    data-bs-toggle="tooltip" title="{{ claim[7] }}">
+                                                <i class="fas fa-sticky-note"></i>
+                                            </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h4>No claims found</h4>
+                        <p class="text-muted">
+                            {% if selected_status %}
+                                No claims with status "{{ selected_status }}" found.
+                            {% else %}
+                                No claims have been submitted yet.
+                            {% endif %}
+                        </p>
+                        <a href="{{ url_for('add_claim') }}" class="btn btn-success">
+                            <i class="fas fa-plus"></i> Submit First Claim
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Claims Statistics -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5><i class="fas fa-chart-pie"></i> Claims Statistics</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="card border-primary">
+                            <div class="card-body">
+                                <h3 class="text-primary">{{ claims|length }}</h3>
+                                <p class="text-muted">Total Claims</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-success">
+                            <div class="card-body">
+                                <h3 class="text-success">
+                                    {{ claims|selectattr('5', 'equalto', 'Completed')|list|length }}
+                                </h3>
+                                <p class="text-muted">Completed</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-warning">
+                            <div class="card-body">
+                                <h3 class="text-warning">
+                                    {{ claims|selectattr('5', 'equalto', 'Pending')|list|length }}
+                                </h3>
+                                <p class="text-muted">Pending</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-danger">
+                            <div class="card-body">
+                                <h3 class="text-danger">
+                                    {{ claims|selectattr('5', 'equalto', 'Cancelled')|list|length }}
+                                </h3>
+                                <p class="text-muted">Cancelled</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden form for status updates -->
+<form id="statusUpdateForm" method="POST" style="display: none;">
+    <input type="hidden" name="claim_id" id="claimIdInput">
+    <input type="hidden" name="status" id="statusInput">
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Initialize tooltips
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+});
+
+// Function to update claim status
+function updateClaimStatus(claimId, newStatus) {
+    const actionText = newStatus === 'Completed' ? 'complete' : 'cancel';
+    const confirmText = `Are you sure you want to ${actionText} this claim?`;
+    
+    if (confirm(confirmText)) {
+        const form = document.getElementById('statusUpdateForm');
+        const claimIdInput = document.getElementById('claimIdInput');
+        const statusInput = document.getElementById('statusInput');
+        
+        claimIdInput.value = claimId;
+        statusInput.value = newStatus;
+        
+        // Update form action
+        form.action = `/claims/update/${claimId}`;
+        form.submit();
+    }
+}
+
+// Auto-refresh pending claims every 30 seconds
+{% if selected_status == 'Pending' or not selected_status %}
+setInterval(function() {
+    // Only refresh if there are pending claims and user hasn't interacted recently
+    const pendingCount = {{ claims|selectattr('5', 'equalto', 'Pending')|list|length }};
+    if (pendingCount > 0) {
+        // You could implement a subtle notification or auto-refresh here
+        console.log('Checking for claim updates...');
+    }
+}, 30000);
+{% endif %}
+</script>
+{% endblock %}
