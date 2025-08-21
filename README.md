@@ -493,4 +493,4 @@ Potential improvements for future versions:
 
 ---
 
-**Note**: This is an internship project demonstrating full-stack web development skills, data analysis capabilities, and system design understanding. The code includes comprehensive comments and follows best practices for maintainability and scalability.
+**Note**: This is an internship project demonstrating data analysis capabilities, and system design understanding. The code includes comprehensive comments and follows best practices for maintainability and scalability.
